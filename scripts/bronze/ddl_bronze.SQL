@@ -3,88 +3,83 @@
 DDL Script: Create Bronze Tables
 ===============================================================================
 Script Purpose:
-    This script creates tables in the 'bronze' schema, dropping existing tables 
-    if they already exist.
+    This script creates tables in the 'bronze' schema.
 	  Run this script to re-define the DDL structure of 'bronze' Tables
 ===============================================================================
 */
 
-IF OBJECT_ID('bronze.crm_cust_info', 'U') IS NOT NULL
-    DROP TABLE bronze.crm_cust_info;
-GO
+CREATE TABLE bronze.customers (
+    customer_id INT IDENTITY PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(100),
+    created_at DATETIME
+);
 
-CREATE TABLE bronze.crm_cust_info (
-    cst_id              INT,
-    cst_key             NVARCHAR(50),
-    cst_firstname       NVARCHAR(50),
-    cst_lastname        NVARCHAR(50),
-    cst_marital_status  NVARCHAR(50),
-    cst_gndr            NVARCHAR(50),
-    cst_create_date     DATE
+CREATE TABLE bronze.accounts (
+    account_id INT IDENTITY PRIMARY KEY,
+    customer_id INT,
+    account_num VARCHAR(30),
+    account_type VARCHAR(20),
+    currency CHAR(3),
+    opened_date DATE
+);
+
+CREATE TABLE bronze.merchant_categories (
+    category_id INT IDENTITY PRIMARY KEY,
+    category_name VARCHAR(50)
+);
+
+CREATE TABLE bronze.merchants (
+    merchant_id INT IDENTITY PRIMARY KEY,
+    merchant_name VARCHAR(100),
+    category_id INT
+);
+
+CREATE TABLE bronze.cards (
+    card_id INT IDENTITY PRIMARY KEY,
+    account_id INT,
+    card_type VARCHAR(10),
+    opened_date DATE,
+    credit_limit DECIMAL(12,2)
+);
+
+CREATE TABLE bronze.transactions (
+    txn_id INT IDENTITY PRIMARY KEY,
+    account_id INT,
+    txn_date DATETIME,
+    txn_type VARCHAR(20),
+    amount DECIMAL(12,2),
+    description VARCHAR(200),
+    merchant_id INT,
+    related_txn_id INT
+);
+
+CREATE TABLE bronze.card_transactions (
+    card_txn_id INT IDENTITY PRIMARY KEY,
+    card_id INT,
+    txn_date DATETIME,
+    amount DECIMAL(12,2),
+    merchant_id INT
+);
+
+CREATE TABLE bronze.loans (
+    loan_id INT IDENTITY PRIMARY KEY,
+    customer_id INT,
+    principal DECIMAL(12,2),
+    interest_rate DECIMAL(5,2),
+    term_months INT,
+    start_date DATE,
+    status VARCHAR(20)
+);
+
+CREATE TABLE bronze.loan_payments (
+    payment_id INT IDENTITY PRIMARY KEY,
+    loan_id INT,
+    payment_date DATE,
+    amount DECIMAL(12,2),
+    principal_paid DECIMAL(12,2),
+    interest_paid DECIMAL(12,2)
 );
 GO
 
-IF OBJECT_ID('bronze.crm_prd_info', 'U') IS NOT NULL
-    DROP TABLE bronze.crm_prd_info;
-GO
-
-CREATE TABLE bronze.crm_prd_info (
-    prd_id       INT,
-    prd_key      NVARCHAR(50),
-    prd_nm       NVARCHAR(50),
-    prd_cost     INT,
-    prd_line     NVARCHAR(50),
-    prd_start_dt DATETIME,
-    prd_end_dt   DATETIME
-);
-GO
-
-IF OBJECT_ID('bronze.crm_sales_details', 'U') IS NOT NULL
-    DROP TABLE bronze.crm_sales_details;
-GO
-
-CREATE TABLE bronze.crm_sales_details (
-    sls_ord_num  NVARCHAR(50),
-    sls_prd_key  NVARCHAR(50),
-    sls_cust_id  INT,
-    sls_order_dt INT,
-    sls_ship_dt  INT,
-    sls_due_dt   INT,
-    sls_sales    INT,
-    sls_quantity INT,
-    sls_price    INT
-);
-GO
-
-IF OBJECT_ID('bronze.erp_loc_a101', 'U') IS NOT NULL
-    DROP TABLE bronze.erp_loc_a101;
-GO
-
-CREATE TABLE bronze.erp_loc_a101 (
-    cid    NVARCHAR(50),
-    cntry  NVARCHAR(50)
-);
-GO
-
-IF OBJECT_ID('bronze.erp_cust_az12', 'U') IS NOT NULL
-    DROP TABLE bronze.erp_cust_az12;
-GO
-
-CREATE TABLE bronze.erp_cust_az12 (
-    cid    NVARCHAR(50),
-    bdate  DATE,
-    gen    NVARCHAR(50)
-);
-GO
-
-IF OBJECT_ID('bronze.erp_px_cat_g1v2', 'U') IS NOT NULL
-    DROP TABLE bronze.erp_px_cat_g1v2;
-GO
-
-CREATE TABLE bronze.erp_px_cat_g1v2 (
-    id           NVARCHAR(50),
-    cat          NVARCHAR(50),
-    subcat       NVARCHAR(50),
-    maintenance  NVARCHAR(50)
-);
-GO
